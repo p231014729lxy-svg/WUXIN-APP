@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Moon, Play, Pause, ChevronRight } from 'lucide-react';
 import { useAudio } from '../context/AudioContext';
+import sleepMusic from '../assets/audio/sleep.mp3';
 
 const TypingText = ({ text, speed = 30 }) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -211,15 +212,29 @@ const SleepTherapyModal = ({ isOpen, onClose }) => {
   const PLAYER_ID = 'sleep-therapy-audio';
 
   useEffect(() => {
-    // We cannot use activeModule to determine play/pause directly because
-    // activeModule controls the view, but not necessarily the playback state.
-    // However, the original code had `isPlaying` state logic that seems missing in the provided snippet.
-    // Assuming we want to stop audio when modal closes or unmounts.
-    
-    return () => {
+    if (isOpen) {
+        // Play audio when modal opens
+        playExclusive(PLAYER_ID);
+        if (audioRef.current) {
+            audioRef.current.volume = 0.5;
+            audioRef.current.play().catch(e => console.log("Sleep audio play failed", e));
+        }
+    } else {
+        // Stop audio when modal closes
         stopExclusive(PLAYER_ID);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+    }
+
+    return () => {
+        // Cleanup on unmount
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
     };
-  }, []);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>

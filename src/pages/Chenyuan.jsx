@@ -722,7 +722,7 @@ const HeartForestView = () => {
                       </button>
                       <button onClick={handleAIPolish} className="text-theme-secondary hover:text-[var(--color-accent)]"><Sparkles size={18} /></button>
                    </div>
-                   <button onClick={handleSendPost} className="text-xs bg-theme-primary text-[var(--color-bg-primary)] px-3 py-1 rounded-full">发布</button>
+                   <button onClick={handleSendPost} className="text-xs btn-theme px-3 py-1 rounded-full shadow-sm hover:brightness-110 transition-all">发布</button>
                 </div>
              </div>
           </div>

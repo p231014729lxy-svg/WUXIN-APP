@@ -32,9 +32,9 @@ const GeneralPlayerCard = () => {
   const PLAYER_ID = 'general-player';
 
   const tracks = [
-    { title: "宁心安神", src: sleepMusic },
-    { title: "山涧流水", src: waterMusic },
-    { title: "五音养脏", src: fiveTonesGeneral }
+    { title: "宁心安神", src: sleepMusic || '' },
+    { title: "山涧流水", src: waterMusic || '' },
+    { title: "五音养脏", src: fiveTonesGeneral || '' }
   ];
 
   // Sync with global exclusive state
@@ -52,13 +52,13 @@ const GeneralPlayerCard = () => {
         return;
     }
     if (isPlaying) {
-      audioRef.current.pause();
+      if (audioRef.current) audioRef.current.pause();
       setIsPlaying(false);
       stopExclusive(PLAYER_ID);
     } else {
       // Start playing
       playExclusive(PLAYER_ID);
-      audioRef.current.play();
+      if (audioRef.current) audioRef.current.play().catch(e => console.error("Play failed", e));
       setIsPlaying(true);
     }
   };

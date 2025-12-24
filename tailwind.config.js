@@ -7,6 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        'theme-primary': 'var(--color-text-primary)',
+        'theme-secondary': 'var(--color-text-secondary)',
+        'theme-surface': 'var(--color-bg-overlay)',
         // Custom palette based on RGB(18, 110, 130) -> #126E82
         // Generated palette to maintain contrast ratios
         primary: {

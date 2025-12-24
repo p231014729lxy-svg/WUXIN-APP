@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Play, Pause, Volume2, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAudio } from '../context/AudioContext';
 
 // Import Audio Files
 import ziAudio from '../assets/audio/twelve_hours/zi.mp3';
@@ -63,6 +64,8 @@ const TwelveHoursModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('reminder'); // 'reminder' or 'training'
   const [trainingState, setTrainingState] = useState('idle'); // 'idle', 'playing', 'countdown', 'finished'
   const audioRef = useRef(null);
+  const { playExclusive, stopExclusive } = useAudio();
+  const PLAYER_ID = 'twelve-hours-modal';
 
   // Time Order Keys
   const timeOrder = ['zi', 'chou', 'yin', 'mao', 'chen', 'si', 'wu', 'wei', 'shen', 'you', 'xu', 'hai'];
@@ -126,20 +129,46 @@ const TwelveHoursModal = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && activeTab === 'reminder' && config.audio) {
-      // Stop previous audio if any (simple implementation, relying on new Audio object replacement)
-      // In a more robust app, we might track the audio instance to pause it explicitly before creating new.
-      const audio = new Audio(config.audio);
-      audio.volume = 0.6;
-      audio.play().catch(e => console.log("Autoplay blocked", e));
-      
-      // Cleanup function to stop audio when effect re-runs (time changes) or unmounts
-      return () => {
-          audio.pause();
-          audio.currentTime = 0;
-      };
+    // Only run if modal is open
+    if (!isOpen) return;
+
+    if (activeTab === 'reminder' && config.audio) {
+        // Use AudioContext to handle exclusive playback (pauses BGM)
+        playExclusive(PLAYER_ID);
+        
+        const audio = new Audio(config.audio);
+        audio.volume = 0.6;
+        audio.play().catch(e => console.log("Autoplay blocked", e));
+        
+        // Keep track of current audio instance to clean up
+        audioRef.current = audio;
+    } else {
+        // If conditions not met (e.g. switched to training tab), stop exclusive playback
+        stopExclusive(PLAYER_ID);
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
     }
+
+    // Cleanup function for when deps change or unmount
+    return () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+    };
   }, [isOpen, activeTab, selectedTimeKey]); // Depend on selectedTimeKey to re-trigger on switch
+
+  // Separate effect to handle cleanup when modal closes completely
+  useEffect(() => {
+      if (!isOpen) {
+          stopExclusive(PLAYER_ID);
+          if (audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current.currentTime = 0;
+          }
+      }
+  }, [isOpen]);
 
   const startTraining = () => {
     setTrainingState('playing');
