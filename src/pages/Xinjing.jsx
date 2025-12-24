@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 import { useChat } from '../context/ChatContext';
+import { useUser } from '../context/UserContext';
+import { useNavigation } from '../context/NavigationContext';
 import { Home, Activity, Wifi, Sparkles } from 'lucide-react';
 import SmartLinkageModal from '../components/SmartLinkageModal';
 
